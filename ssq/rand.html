@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ssq</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+<style>
+	.field {
+		margin-bottom: 20px;
+	}
+	.field-label,
+	.textinput {
+		display: block;
+	}
+	.field-label {
+		margin-bottom: 10px;
+	}
+
+	.field-label-reds::before,
+	.field-label-blue::before {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		margin-right: 5px;
+		vertical-align: middle;
+		border-radius: 50%;
+		content: '';
+	}
+	.field-label-reds::before {
+		background: #f00;
+	}
+	.field-label-blue::before {
+		background: #09f;
+	}
+	.textinput {
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
+		width: 100%;
+		height: 36px;
+		padding: 5px;
+		font-size: 16px;
+		border: 1px solid #ccc;
+	}
+	.button {
+		display: block;
+		width: 100%;
+		padding: 10px;
+		color: #fff;
+		font-size: 16px;
+		background: #09f;
+		border: none;
+	}
+	.result {
+		margin-top: 20px;
+		padding-left: 0;
+		list-style: none;
+	}
+	.result li {
+		margin-bottom: 5px;
+	}
+	.result li:nth-child(2n + 1) {
+		margin-bottom: 30px;
+	}
+</style>
+</head>
+<body>
+<div>
+	<div class="field">
+		<label class="field-label field-label-reds" for="input-reds-number">红球：</label>
+		<input class="textinput" type="number" id="input-reds-number" value="7" min="6" max="33">
+	</div>
+	<div class="field">
+		<label class="field-label field-label-blue" for="input-blue-number">篮球：</label>
+		<input class="textinput" type="number" id="input-blue-number" value="2" min="1" max="16">
+	</div>
+	<button class="button" type="button" id="button-7-1">随 机</button>
+
+	<ol class="result" id="div-random-7-1"></ol>
+</div>
+<script>
+(function(){
+	'use strict';
+
+    function random(min, max){
+        let num = Math.floor(Math.random()*(max - min + 1));
+
+    	return (num < min || num > max) ? random(min, max) : num;
+    }
+
+	function generateBalls(quantity){
+		return Array(quantity + 1).join('a').split('').map((n, i) => (i < 9 ? '0' : '') + (i + 1));
+	}
+
+	function moveBall(ball, step) {
+		let b = parseFloat(ball) + step;
+		if (b > 33) {
+			b -= 33;
+		}else if (b < 1) {
+			b += 33;
+		}
+
+		return (b < 10 ? '0' : '') + b;
+	}
+
+	function moveBalls(balls, step) {
+		return balls.map(ball => moveBall(ball, step));
+	}
+
+	let domInputReds = document.getElementById('input-reds-number');
+	let domInputBlue = document.getElementById('input-blue-number');
+	function randomBalls(balls, num){
+    	let result = [];
+		(function randomOne(balls){
+			if(result.length >= num) return;
+
+			let list = [...balls];
+			let index = random(0, list.length - 1);
+
+			result.push(list[index]);
+			list.splice(index, 1);
+			
+			randomOne(list);
+		})(balls);
+		
+		result.sort((a, b) => parseFloat(a) - parseFloat(b));
+		
+		return result;
+	}
+	function random71(){
+		let reds = generateBalls(33);
+		let blues = generateBalls(16);
+		let redsNum = parseFloat(domInputReds.value);
+		let blueNum = parseFloat(domInputBlue.value);
+
+		let result = randomBalls(reds, redsNum);
+
+		let blue = randomBalls(blues, blueNum);
+		blue = blue.join(',');
+
+		let list = [
+			`${result.join(',')}+${blue}`,
+
+			`${moveBalls(result, 1).join(',')}+${blue}`,
+			`${moveBalls(result, -1).join(',')}+${blue}`,
+
+			`${moveBalls(result, 2).join(',')}+${blue}`,
+			`${moveBalls(result, -2).join(',')}+${blue}`,
+
+			`${moveBalls(result, 3).join(',')}+${blue}`,
+			`${moveBalls(result, -3).join(',')}+${blue}`,
+
+			`${moveBalls(result, 4).join(',')}+${blue}`,
+			`${moveBalls(result, -4).join(',')}+${blue}`,
+
+			`${moveBalls(result, 5).join(',')}+${blue}`,
+			`${moveBalls(result, -5).join(',')}+${blue}`
+		];
+
+		list.push(list[random(0, list.length - 1)]);
+
+		return `<li>${list.join('</li><li>')}</li>`;
+	}
+	document.getElementById('button-7-1').onclick = function(){
+		let result = random71();
+		document.getElementById('div-random-7-1').innerHTML = result;
+	};
+})();
+</script>
+</body>
+</html>
+
+
+
+
+

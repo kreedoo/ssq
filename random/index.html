@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>随机数</title>
+</head>
+<body>
+<div style="width: 320px; margin: 0 auto;">
+    <h4>随机数生成器</h4>
+    <div style="margin-bottom: 10px">
+        最小值：<input type="number" id="min" value="20" />
+    </div>
+    <div style="margin-bottom: 10px">
+        最大值：<input type="number" id="max" value="10000" />
+    </div>
+    <div style="margin-bottom: 10px">
+        精确度：<input type="decimals" id="decimals" value="2" />
+    </div>
+    <div style="margin-bottom: 10px">
+        生成个数：<input type="number" id="numLength" value="5" />
+    </div>
+    <div id="result" style="margin-bottom: 30px"></div>
+    <button type="button" id="button">生成</button>
+</div>
+<script>
+    function random(min, max, decimals){
+        min = min || 0;
+        max = max || 1;
+        decimals = decimals || 0;
+        return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+    }
+    var inputMin = document.getElementById('min');
+    var inputMax = document.getElementById('max');
+    var inputDecimals = document.getElementById('decimals');
+    var button = document.getElementById('button');
+    var divResult = document.getElementById('result');
+    var inputNumLength = document.getElementById('numLength');
+
+    button.onclick = function(){
+        var min = parseFloat(inputMin.value);
+        var max = parseFloat(inputMax.value);
+        var decimals = parseFloat(inputDecimals.value);
+        var numLength = parseFloat(inputNumLength.value);
+        if(min < 0){
+            alert('最小值必须大于或者等于0');
+            return false;
+        }
+        if(max < min){
+            alert('最大值必须大于最小值');
+            return false;
+        }
+        if(decimals < 0){
+            alert('精确度必须是大于或者等于0的整数');
+        }
+        if(numLength < 1){
+            alert('生成个数必须大于或者等于1的整数');
+        }
+
+        divResult.innerHTML = '<dl><dt>结果：</dt><dd>' + Array(numLength + 1).join('a').split('').map((c, i) => (i + 1) + ': ' + random(min, max, decimals)).join('</dd><dd>') + '</dd></dl>';
+    };
+</script>
+</body>
+</html>
