@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>suiji</title>
+        <style>
+            .page {
+                max-width: 480px;
+                margin: 0 auto;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 16px;
+            }
+            .row {
+                margin-bottom: 10px;
+            }
+            .row input {
+                width: 100%;
+                border: none;
+                background: #efefef;
+                padding: 5px;
+                height: 36px;
+                outline: none;
+                margin: 0;
+                box-sizing: border-box;
+                font: inherit;
+            }
+            .row button {
+                outline: none;
+                font: inherit;
+                width: 100%;
+                border: none;
+                background: #09f;
+                color: #fff;
+                height: 40px;
+                text-transform: uppercase;
+                margin: 0;
+                box-sizing: border-box;
+            }
+
+            .page ul {
+                list-style: none;
+                padding-left: 0;
+            }
+            .page li {
+                margin-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="page">
+            <div class="row">
+                <input id="redLen" type="number" placeholder="red" value="7" min="6" max="33" />
+            </div>
+            <div class="row">
+                <input id="blueLen" type="number" placeholder="blue" value="2" min="1" max="16" />
+            </div>
+            <div class="row">
+                <button id="button">go</button>
+            </div>
+            <div id="app"></div>
+        </div>
+        <script type="text/javascript">
+            const redBalls = Array(34).join('0').split('').map((_, index) => index + 1);
+            const blueBalls = Array(17).join('0').split('').map((_, index) => index + 1);
+
+            /**
+            * 生成一个指定范围的随机数
+            * @param {number} min 
+            * @param {number} max
+            * @returns {number} 
+            */
+            function random(min, max) {
+                const rand = Math.random();
+                let num = Math.floor(rand * (max - min + 2));
+                if (num < min) {
+                    num = min;
+                } else if (num > max) {
+                    num = max;
+                }
+                return num;
+            }
+            /**
+            * 随机从一组选项中选择一组不重复选项
+            * @param {Array<number>} balls 
+            * @param {number} len 
+            * @returns {Array<number}
+            */
+            function randomBalls(balls = [], len = 7) {
+                let list = [...balls];
+                let rs = [];
+                const randBall = () => {
+                    const index = random(1, list.length) - 1;
+                    const selectedBall = list[index];
+                    rs.push(selectedBall);
+                    list = list.filter(ball => ball !== selectedBall);
+                };
+
+                for(let i = 0; i < len; i++) {
+                    randBall();
+                }
+
+                rs.sort((a, b) => a - b);
+
+                return rs;
+            }
+
+            function main(redBalls, blueBalls, len = 7, blueLen = 2) {
+                const groupCount = Math.ceil(redBalls.length / len);
+                let list = [...redBalls];
+                let rs = [];
+                for (let i = 0; i < groupCount; i++) {
+                    let listLen = list.length;
+                    let g = [];
+                    if (listLen === 0) break;
+
+                    if (listLen > len) {
+                        g = randomBalls(list, len);
+                        list = list.filter(ball => !g.some(x1ball => x1ball === ball));
+                    } else if (listLen === len) {
+                        g = [...list];
+                        list = [];
+                    } else {
+                        g = [...list, ...randomBalls(redBalls.filter(ball => !list.some(x1ball => x1ball === ball)), len - list.length)];
+                        list = [];
+                        g.sort((a, b) => a - b);
+
+                    }
+                    rs.push([
+                        g,
+                        randomBalls(blueBalls, blueLen)
+                    ]);
+                }
+
+                return rs;
+            }
+
+            function print(list) {
+                const logs = list.map(item => {
+                    const [red, blue] = item;
+                    return '' +
+                        red.map(ball => `${ball < 10 ? '0' : ''}${ball}`).join(',') +
+                        '+' +
+                        blue.map(ball => `${ball < 10 ? '0' : ''}${ball}`).join(',');
+                });
+
+                console.log(logs.join('\n'));
+
+                return logs;
+            }
+
+            const history = [];
+            const divApp = document.getElementById('app');
+            const inputRedLen = document.getElementById('redLen');
+            const inputBlueLen = document.getElementById('blueLen');
+            document.getElementById('button').addEventListener('click', function() {
+                const item = print(main(redBalls, blueBalls, inputRedLen.value || 7, inputBlueLen.value || 2));
+                history.unshift(item);
+
+                const html = history.map(h => `<ul>
+                    ${h.map(line => `    <li>${line}</li>`).join('\n')}
+                </ul>`).join('\n');
+
+                divApp.innerHTML = html;
+            });
+        </script>
+    </body>
+</html>
