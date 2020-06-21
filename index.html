@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
         <title>suiji</title>
         <style>
             .page {
@@ -107,6 +108,7 @@
             function main(redBalls, blueBalls, len = 7, blueLen = 2) {
                 const groupCount = Math.ceil(redBalls.length / len);
                 let list = [...redBalls];
+                let blueList = [...blueBalls];
                 let rs = [];
                 for (let i = 0; i < groupCount; i++) {
                     let listLen = list.length;
@@ -122,13 +124,12 @@
                     } else {
                         g = [...list, ...randomBalls(redBalls.filter(ball => !list.some(x1ball => x1ball === ball)), len - list.length)];
                         list = [];
-                        g.sort((a, b) => a - b);
-
                     }
-                    rs.push([
-                        g,
-                        randomBalls(blueBalls, blueLen)
-                    ]);
+                    g.sort((a, b) => a - b);
+
+                    let b = randomBalls(blueList, blueLen);
+                    blueList = blueList.filter(ball => !b.some(x1ball => x1ball === ball));
+                    rs.push([ g, b ]);
                 }
 
                 return rs;
