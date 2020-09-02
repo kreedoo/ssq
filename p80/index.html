@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>80%随机</title>
+    <style>
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+        }
+        .row {
+            margin-bottom: 10px;
+        }
+        .row input {
+            width: 100%;
+            border: none;
+            background: #efefef;
+            padding: 5px;
+            height: 36px;
+            outline: none;
+            margin: 0;
+            box-sizing: border-box;
+            font: inherit;
+        }
+        .row button {
+            outline: none;
+            font: inherit;
+            width: 100%;
+            border: none;
+            background: #09f;
+            color: #fff;
+            height: 40px;
+            text-transform: uppercase;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .page ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .page li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="row">
+            <input id="count" type="number" placeholder="red" value="7" min="1" />
+        </div>
+        <div class="row">
+            <button id="button">go</button>
+        </div>
+        <div id="app"></div>
+    </div>
+    <script src="./combs.js"></script>
+    <script>
+        const dom = (() => {
+            const cache = {};
+            return function (id) {
+                if (!cache[id]) {
+                    cache[id] = document.getElementById(id);
+                }
+                return cache[id];
+            };
+        })();
+
+        function random(start, end) {
+            return Math.floor(Math.random() * (end - start + 1)) + start;
+        }
+        function generate(count) {
+            const lastIndex = possibleLotteries.length - 1;
+            const result = [];
+            const blues = [];
+            function randomBlue() {
+                let num = random(1, 16);
+                num = `${num < 10 ? 0 : ''}${num}`;
+                if (blues.indexOf(num) > -1) {
+                    return randomBlue();
+                } else {
+                    return num;
+                }
+            }
+            const randomLottery = () => {
+                const index = random(0, lastIndex);
+                const l = possibleLotteries[index];
+                if (result.indexOf(l) > -1) {
+                    return randomLottery();
+                } else {
+                    const blue = randomBlue();
+                    blues.push(blue);
+                    return l.replace(/\+\d+$/, `+${blue}`);
+                }
+            }
+            for (let i = 0; i < count; i += 1) {
+                result.push(randomLottery());
+            }
+
+            return result;
+        }
+
+        dom('button').addEventListener('click', function() {
+            const count = parseFloat(dom('count').value);
+            const lotteries = generate(count);
+            dom('app').innerHTML = `<ul>
+                ${lotteries.map((item, index) => `<li>${item}</li>${(index + 1) % 5 === 0 ? '<li>&nbsp;</li>' : ''}`).join('')}
+            </ul>`;
+        });
+    </script>
+</body>
+</html>
