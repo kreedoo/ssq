@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>守号随机</title>
+    <style>
+        .page {
+            max-width: 480px;
+            margin: 0 auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+        }
+        .row {
+            margin-bottom: 10px;
+        }
+        .row input {
+            width: 100%;
+            border: none;
+            background: #efefef;
+            padding: 5px;
+            height: 36px;
+            outline: none;
+            margin: 0;
+            box-sizing: border-box;
+            font: inherit;
+        }
+        .row button {
+            outline: none;
+            font: inherit;
+            width: 100%;
+            border: none;
+            background: #09f;
+            color: #fff;
+            height: 40px;
+            text-transform: uppercase;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .page ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .page li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="row">
+            <input id="reds" type="text" placeholder="08,11,17,20" />
+        </div>
+        <div class="row">
+            <button id="button">go</button>
+        </div>
+        <div id="app"></div>
+    </div>
+    <script>
+        const dom = (() => {
+            const cache = {};
+            return function (id) {
+                if (!cache[id]) {
+                    cache[id] = document.getElementById(id);
+                }
+                return cache[id];
+            };
+        })();
+
+        function addZero(n) {
+            return n < 10 ? `0${n}` : n;
+        }
+        
+        function random(balls = [], count = 1, result = []) {
+            let randomIndex = Math.floor(Math.random() * balls.length);
+            result.push(balls[randomIndex]);
+            balls.splice(randomIndex, 1);
+
+            if (result.length >= count) {
+                return result;
+            } else {
+                return random(balls, count, result);
+            }
+        }
+
+        function generate(shouhao) {
+            let reds = [];
+            let blues = [];
+            for (let i = 1; i <= 33; i += 1) {
+                reds.push(i);
+                if (i <= 16) {
+                    blues.push(i);
+                }
+            }
+
+            const result = random(reds.filter(item => shouhao.indexOf(item) === -1), 3);
+            let selectReds = shouhao.concat(result);
+            selectReds.sort((a, b) => a - b);
+            selectReds = selectReds.map(item => addZero(item));
+            return `${selectReds.join(',')}+01~16`;
+        }
+
+        const lotteries = [];
+        dom('button').addEventListener('click', function() {
+            let shouhao = dom('reds').value.trim();
+            shouhao = !!shouhao ? shouhao.split(/[^\d]+/).map(item => parseInt(item, 10)) : [8, 11, 17, 20];
+            lotteries.push(generate(shouhao));
+
+            dom('app').innerHTML = `<ul>
+                ${lotteries.map((item, index) => `<li>${item}</li>${(index + 1) % 5 === 0 ? '<li>&nbsp;</li>' : ''}`).join('')}
+            </ul>`;
+        });
+    </script>
+</body>
+</html>
