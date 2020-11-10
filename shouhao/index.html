@@ -12,6 +12,10 @@
             font-size: 16px;
         }
         .row {
+            margin-bottom: 20px;
+        }
+        .row label {
+            display: block;
             margin-bottom: 10px;
         }
         .row input {
@@ -24,6 +28,11 @@
             margin: 0;
             box-sizing: border-box;
             font: inherit;
+        }
+        .row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
         }
         .row button {
             outline: none;
@@ -50,7 +59,21 @@
 <body>
     <div class="page">
         <div class="row">
-            <input id="reds" type="text" placeholder="08,11,17,20" />
+            <label for="count">篮球个数</label>
+            <input id="count" type="text" placeholder="输入选好数，默认: 6" />
+        </div>
+        <div class="row">
+            <label for="reds">守号</label>
+            <input id="reds" type="text" placeholder="输入守号，默认: 08,11,17,20" />
+        </div>
+        <div class="row">
+            <label for="isRandomBlue">
+                <input id="isRandomBlue" type="checkbox" checked="checked" /> 是否机选篮球
+            </label>
+        </div>
+        <div class="row">
+            <label for="blues">篮球选号 或者 篮球数</label>
+            <input id="blues" type="text" placeholder="输入蓝球，默认: 01 ~ 16" />
         </div>
         <div class="row">
             <button id="button">go</button>
@@ -58,6 +81,15 @@
         <div id="app"></div>
     </div>
     <script>
+        const allReds = [];
+        const allBlues = [];
+        for (let i = 1; i <= 33; i += 1) {
+            allReds.push(i);
+            if (i <= 16) {
+                allBlues.push(i);
+            }
+        }
+
         const dom = (() => {
             const cache = {};
             return function (id) {
@@ -75,37 +107,42 @@
         function random(balls = [], count = 1, result = []) {
             let randomIndex = Math.floor(Math.random() * balls.length);
             result.push(balls[randomIndex]);
-            balls.splice(randomIndex, 1);
 
             if (result.length >= count) {
                 return result;
             } else {
-                return random(balls, count, result);
+                return random(balls.filter((ball, ballIndex) => ballIndex !== randomIndex), count, result);
             }
         }
 
-        function generate(shouhao) {
-            let reds = [];
-            let blues = [];
-            for (let i = 1; i <= 33; i += 1) {
-                reds.push(i);
-                if (i <= 16) {
-                    blues.push(i);
-                }
-            }
+        function generate(count, shouhao, lanhao) {
+            let reds = [...allReds];
 
-            const result = random(reds.filter(item => shouhao.indexOf(item) === -1), 3);
+            const result = random(reds.filter(item => shouhao.indexOf(item) === -1), count - shouhao.length);
             let selectReds = shouhao.concat(result);
             selectReds.sort((a, b) => a - b);
             selectReds = selectReds.map(item => addZero(item));
-            return `${selectReds.join(',')}+01~16`;
+            return `${selectReds.join(',')}+${lanhao}`;
         }
 
         const lotteries = [];
         dom('button').addEventListener('click', function() {
+            let count = parseInt(dom('count').value.trim(), 10);
+            count = isNaN(count) || count < 6 ? 6 : count;
             let shouhao = dom('reds').value.trim();
             shouhao = !!shouhao ? shouhao.split(/[^\d]+/).map(item => parseInt(item, 10)) : [8, 11, 17, 20];
-            lotteries.push(generate(shouhao));
+            let isRandomBlue = dom('isRandomBlue').checked;
+            let lanhao = dom('blues').value.trim();
+            if (isRandomBlue) {
+                lanhao = parseInt(lanhao, 10);
+                lanhao = isNaN(lanhao) ? 4 : lanhao;
+                lanhao = random(allBlues, lanhao);
+                lanhao.sort((a, b) => a - b);
+                lanhao = lanhao.map(item => addZero(item)).join(',');
+            } else {
+                lanhao = !!lanhao ? lanhao.split(/[^\d]+/).map(item => addZero(parseInt(item, 10))).join(',') : '01~16';
+            }
+            lotteries.push(generate(count, shouhao, lanhao));
 
             dom('app').innerHTML = `<ul>
                 ${lotteries.map((item, index) => `<li>${item}</li>${(index + 1) % 5 === 0 ? '<li>&nbsp;</li>' : ''}`).join('')}
