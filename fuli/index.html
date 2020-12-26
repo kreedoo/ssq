@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <title>复利计算器</title>
+        <style>
+            *, *:before, *:after {
+                box-sizing: border-box;
+            }
+            input {
+                border: none;
+                width: 100%;
+                background: #efefef;
+                outline: none;
+                height: 30px;
+                line-height: 30px;
+            }
+            .field-box {
+                display: block;
+                margin-bottom: 10px;
+            }
+            button {
+                width: 100%;
+                height: 40px;
+                line-height: 40px;
+                outline: none;
+                background: #09f;
+                color: #fff;
+                border: none;
+            }
+        </style>
+    </head>
+    <body>
+        <label class="field-box"><input id="money" type="number" placeholder="本金，默认：0.03941675" /></label>
+        <label class="field-box"><input id="rate" type="number" placeholder="利率(%)，默认：10" /></label>
+        <label class="field-box"><input id="times" type="number" placeholder="次数(>=1次)，默认：100" /></label>
+        <button id="calc">计算</button>
+        <div class="result-box" id="result"></div>
+
+        <script>
+            function fuli(money, rate, times = 1) {
+                let x = money;
+                for (let i = times; i >= 1; i -= 1) {
+                    // x = x * (rate / 100) * 0.8 + x * 0.2;
+                    x *= rate / 100 + 1;
+                }
+                return x;
+            }
+            window.onload = function() {
+                const inputMoney = document.getElementById('money');
+                const inputRate = document.getElementById('rate');
+                const inputTimes = document.getElementById('times');
+                const buttonCalc = document.getElementById('calc');
+                const divResult = document.getElementById('result');
+
+                buttonCalc.addEventListener('click', () => {
+                    let money = parseFloat(inputMoney.value);
+                    money = isNaN(money) ? 0.03941675 : money;
+
+                    let rate = parseFloat(inputRate.value);
+                    rate = isNaN(rate) ? 10 : rate;
+
+                    let times = parseFloat(inputTimes.value);
+                    times = isNaN(times) ? 100 : times;
+
+                    let content = '';
+                    for (let i = 0; i < times; i += 1) {
+                        const index = i + 1;
+                        const num = fuli(money, rate, index).toString().split('.');
+                        content += `<div>${index}: ${num[0]}.${num[1].slice(0, 8)} - ?</div>\n`;
+                    }
+                    divResult.innerHTML = `<div>结果：</div>\n${content}`;
+                });
+            };
+        </script>
+    </body>
+</html>
