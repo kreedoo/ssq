@@ -56,7 +56,7 @@
 
                 buttonCalc.addEventListener('click', () => {
                     let money = parseFloat(inputMoney.value);
-                    money = isNaN(money) ? 0.03941675 : money;
+                    money = isNaN(money) ? 0.00146936 : money;
 
                     let rate = parseFloat(inputRate.value);
                     rate = isNaN(rate) ? 10 : rate;
@@ -68,7 +68,7 @@
                     for (let i = 0; i < times; i += 1) {
                         const index = i + 1;
                         const num = fuli(money, rate, index).toString().split('.');
-                        content += `<div>${index}: ${num[0]}.${num[1].slice(0, 8)} - ?</div>\n`;
+                        content += `<div>${index}: ${num[0]}.${num[1] ? num[1].slice(0, 8) : '00000000'} - ?</div>\n`;
                     }
                     divResult.innerHTML = `<div>结果：</div>\n${content}`;
                 });
